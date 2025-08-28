@@ -18,42 +18,20 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-// Import Google Play Billing (이미 설치된 react-native-iap 사용)
-import * as RNIap from 'react-native-iap';
 
 // Enter your Google AI API key here (recommended to use environment variables later)
 const GOOGLE_AI_API_KEY = 'AIzaSyCPOkqRbG_H-Uybu5S25uHw-qkrTiAJ0IQ';
 
-// Google Play Billing 상품 설정
-const productIds = ['premium_subscription']; // Google Play Console에서 설정한 제품 ID
-
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// Google Play Billing 초기화 및 결제 처리
+// Simulated payment functions (for now, until Google Play Billing setup)
 const initializeIAP = async () => {
-  try {
-    await RNIap.initConnection();
-    console.log('Google Play Billing 연결 성공');
-  } catch (error) {
-    console.error('Google Play Billing 연결 실패:', error);
-  }
+  console.log('Payment system initialized (simulation mode)');
 };
 
-// Google Play 결제 처리 함수
 const purchasePremium = async () => {
-  try {
-    const products = await RNIap.getProducts(productIds);
-    console.log('사용 가능한 상품:', products);
-    
-    if (products.length > 0) {
-      const purchase = await RNIap.requestPurchase(productIds[0]);
-      console.log('구매 성공:', purchase);
-      return purchase;
-    }
-  } catch (error) {
-    console.error('구매 실패:', error);
-    throw error;
-  }
+  console.log('Premium purchase simulation');
+  return { success: true };
 };
 
 // Chat Assistant App Component
@@ -233,12 +211,12 @@ function ChatAssistantApp() {
     }));
   };
 
-  // Handle premium purchase with Google Play Billing
+  // Handle premium purchase (simulation mode)
   const handlePremiumPurchase = async (paymentMethod) => {
     try {
         Alert.alert(
           'Payment Confirmation',
-          `Proceed with a monthly payment of 2,000 KRW using Google Play?`,
+          `Proceed with a monthly payment of 2,000 KRW?`,
           [
             {
               text: 'Cancel',
@@ -250,11 +228,8 @@ function ChatAssistantApp() {
                 setLoading(true);
                 
                 try {
-                  // Google Play Billing으로 결제 처리
-                  const purchase = await purchasePremium();
-                  
-                  if (purchase) {
-                    // 결제 성공 처리
+                  // Simulate payment processing
+                  setTimeout(async () => {
                     setIsPremium(true);
                     await AsyncStorage.setItem('premiumStatus', JSON.stringify(true));
                     setShowPremiumModal(false);
@@ -265,9 +240,7 @@ function ChatAssistantApp() {
                       'Premium subscription activated!\nYou can now receive unlimited answers.',
                       [{ text: 'OK' }]
                     );
-                  } else {
-                    throw new Error('Purchase failed');
-                  }
+                  }, 2000);
                 } catch (error) {
                   console.error('Payment error:', error);
                   setLoading(false);
@@ -398,19 +371,19 @@ function ChatAssistantApp() {
     return [
       {
         name: 'Interest Expression Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that subtly expresses interest and affection toward the other person. Naturally show your desire to know more about them and include an intention to continue the conversation. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a warm and interested tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate interest.' : ''} **Important**: Write a reply that expresses affection without being too direct.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that subtly shows romantic interest and curiosity about the other person. Use warm, engaging language that invites more conversation. ${userGender === 'male' && opponentGender === 'female' ? 'Use confident masculine expressions that show genuine interest in getting to know her better.' : userGender === 'female' && opponentGender === 'male' ? 'Use warm feminine expressions that show interest while maintaining some mystery.' : ''} ${userAge === 'teens' ? 'Use youthful, excited expressions of interest.' : userAge === '20s' ? 'Use modern, confident ways to show interest.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated expressions of romantic interest.' : ''} Include questions or comments that encourage them to share more about themselves. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a warm and interested tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate interest.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Attractive Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that naturally showcases your charm while arousing interest in the other person. Use humor or wit to create memorable conversations. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to an attractive and interesting tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to appeal appropriately.' : ''} **Important**: Write an impressive reply that\'s not excessive.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that showcases your personality and charm to attract their interest. Be confident, engaging, and memorable. ${userGender === 'male' && opponentGender === 'female' ? 'Use confident masculine charm with wit and humor to impress her.' : userGender === 'female' && opponentGender === 'male' ? 'Use charming feminine appeal with playful confidence that draws his attention.' : ''} ${userAge === 'teens' ? 'Use youthful energy and trendy expressions to be appealing.' : userAge === '20s' ? 'Use modern confidence and charisma to stand out.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature sophistication and refined charm to be attractive.' : ''} Show your best qualities through your words and tone. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to an attractive and interesting tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to appeal appropriately.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Intimacy Building Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that increases intimacy and brings you closer to the other person. Include intentions to find common ground or share special experiences. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly and affectionate tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show reactions that can form intimacy.' : ''} **Important**: Write a reply that naturally forms intimacy.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that creates emotional connection and brings you closer together. Share something personal or find common ground. ${userGender === 'male' && opponentGender === 'female' ? 'Use sincere masculine expressions that build trust and emotional connection with her.' : userGender === 'female' && opponentGender === 'male' ? 'Use caring feminine expressions that create emotional intimacy and understanding with him.' : ''} ${userAge === 'teens' ? 'Use heartfelt, genuine expressions appropriate for young romance.' : userAge === '20s' ? 'Use modern, authentic ways to build emotional connection.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, deep expressions that create meaningful intimacy.' : ''} Be vulnerable and encouraging to deepen the relationship. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly and affectionate tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show reactions that can form intimacy.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Careful Rejection Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Politely reject the other person's proposal while leaving room without completely severing the relationship. Clearly communicate your position without hurting the other person's feelings. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and considerate tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **Important**: Write a reply that maintains the relationship while setting boundaries.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Politely decline their romantic advance while preserving their dignity and the possibility of friendship. Be gentle but clear about your boundaries. ${userGender === 'male' && opponentGender === 'female' ? 'Use respectful masculine language that declines gently while appreciating her feelings.' : userGender === 'female' && opponentGender === 'male' ? 'Use soft feminine expressions that let him down easy while being clear about your position.' : ''} ${userAge === 'teens' ? 'Use age-appropriate language to decline romantic interest kindly.' : userAge === '20s' ? 'Use modern, respectful ways to set romantic boundaries.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated language to decline gracefully while maintaining respect.' : ''} Acknowledge their feelings while redirecting the relationship. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and considerate tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       }
     ];
   };
@@ -429,19 +402,19 @@ function ChatAssistantApp() {
     return [
       {
         name: 'Friendly Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a reply in a friendly and casual tone as if I'm responding to the other person. Write naturally as if having a conversation with someone close, fitting the context of the conversation. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **Important**: Write a message that I'm sending to the other person.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a casual, friendly reply using informal language like you're talking to a close friend. Use casual expressions, contractions, and a relaxed tone. ${userGender === 'male' ? 'Use masculine, casual expressions like "man", "bro", "dude" when appropriate.' : userGender === 'female' ? 'Use feminine, casual expressions with warm emoticons and friendly language.' : ''} ${userAge === 'teens' ? 'Use trendy slang and youth expressions.' : userAge === '20s' ? 'Use modern casual expressions popular among young adults.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature but friendly casual language without being too formal.' : ''} ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Polite Style', 
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a polite and courteous reply as if I'm responding to the other person. Write a reply that respects the other person while feeling warm, fitting the context of the conversation. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a more polite tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **Important**: Write a message that I'm sending to the other person.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a formal, respectful reply using polite language and honorifics. Use complete sentences, avoid contractions, and maintain a courteous tone throughout. ${userGender === 'male' ? 'Use respectful masculine language with proper honorifics.' : userGender === 'female' ? 'Use gentle, respectful feminine language with appropriate courtesy.' : ''} ${userAge === 'teens' ? 'Use polite but age-appropriate language for a teenager.' : userAge === '20s' ? 'Use modern polite expressions suitable for young adults.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use sophisticated, mature polite language with proper etiquette.' : ''} Include phrases like "please", "thank you", and formal sentence structures. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a more polite tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Humorous Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a humorous and fun reply as if I'm responding to the other person. Use appropriate jokes or witty expressions that fit the context of the conversation. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adding humorous elements.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **Important**: Write a message that I'm sending to the other person.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a funny, witty reply that will make the other person laugh or smile. Use appropriate humor, playful teasing, or clever wordplay. ${userGender === 'male' ? 'Use masculine humor styles like witty one-liners or playful banter.' : userGender === 'female' ? 'Use charming, cute humor with playful expressions and light teasing.' : ''} ${userAge === 'teens' ? 'Use trendy memes, internet slang, and youth humor.' : userAge === '20s' ? 'Use modern humor and pop culture references.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use sophisticated, mature humor without being too silly.' : ''} Make sure the humor is appropriate for the conversation context. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adding humorous elements.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       },
       {
         name: 'Polite Rejection',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a reply that politely and courteously rejects the other person's proposal or request. Write in a way that clearly communicates your position while being considerate so the other person doesn't get hurt. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and courteous tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **Important**: Write a reply that contains a clear meaning of rejection without being direct.`
+        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a polite but clear rejection that declines the other person's request or proposal. Be gentle but firm in your refusal. ${userGender === 'male' ? 'Use direct but respectful masculine language to decline clearly.' : userGender === 'female' ? 'Use soft, gentle feminine language that lets them down easy.' : ''} ${userAge === 'teens' ? 'Use age-appropriate language to decline politely.' : userAge === '20s' ? 'Use modern, respectful ways to say no.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated language to decline gracefully.' : ''} Include appreciation for their interest but make your position clear. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and courteous tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
       }
     ];
   };
@@ -2061,13 +2034,13 @@ ${personalizedStyles[3].prompt}
                               style={[styles.editButton, styles.saveButton]}
                               onPress={() => setEditingMessageIndex(-1)}
                             >
-                              <Text style={styles.editButtonText}>저장</Text>
+                              <Text style={styles.editButtonText}>Save</Text>
                             </TouchableOpacity>
                             <TouchableOpacity 
                               style={[styles.editButton, styles.cancelButton]}
                               onPress={() => setEditingMessageIndex(-1)}
                             >
-                              <Text style={styles.editButtonText}>취소</Text>
+                              <Text style={styles.editButtonText}>Cancel</Text>
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -2161,7 +2134,7 @@ ${personalizedStyles[3].prompt}
         {aiReplies.length > 0 && (
           <View style={isRomanceMode ? styles.romanceSection : styles.section}>
             <Text style={isRomanceMode ? styles.romanceSectionTitle : styles.sectionTitle}>
-              {isRomanceMode ? '💕 AI Romance Response Suggestions' : '💡 AI Response Suggestions'}
+              {isRomanceMode ? '💕 Dating Response Suggestions' : '💡 AI Response Suggestions'}
             </Text>
             
             {/* Other party's intent analysis results display (toggleable) */}
