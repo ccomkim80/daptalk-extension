@@ -112,9 +112,6 @@ class MessagesViewController: MSMessagesAppViewController {
     }
     
     private func setupSettings() {
-        // Configure dating mode switch
-        datingModeSwitch.addTarget(self, action: #selector(datingModeSwitchChanged(_:)), for: .valueChanged)
-        
         // Configure segmented controls
         userGenderSegmentedControl.insertSegment(withTitle: "Male", at: 0, animated: false)
         userGenderSegmentedControl.insertSegment(withTitle: "Female", at: 1, animated: false)
@@ -200,7 +197,7 @@ class MessagesViewController: MSMessagesAppViewController {
         }
     }
     
-    @objc private func datingModeSwitchChanged(_ sender: UISwitch) {
+    @IBAction func datingModeSwitchChanged(_ sender: UISwitch) {
         userProfile = UserProfile(
             gender: userProfile.gender,
             age: userProfile.age,
