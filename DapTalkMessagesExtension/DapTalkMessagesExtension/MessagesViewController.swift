@@ -4,13 +4,13 @@ import Messages
 class MessagesViewController: MSMessagesAppViewController {
     
     // MARK: - Properties
-    @IBOutlet weak var modeSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var chatTextView: UITextView!
-    @IBOutlet weak var responseStackView: UIStackView!
-    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
-    @IBOutlet weak var genderSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var opponentGenderSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var analyzeButton: UIButton!
+    private var modeSegmentedControl: UISegmentedControl!
+    private var chatTextView: UITextView!
+    private var responseStackView: UIStackView!
+    private var loadingIndicator: UIActivityIndicatorView!
+    private var genderSegmentedControl: UISegmentedControl!
+    private var opponentGenderSegmentedControl: UISegmentedControl!
+    private var analyzeButton: UIButton!
     
     private var currentMode: ChatMode = .general
     private var userGender: Gender = .none
@@ -46,8 +46,118 @@ class MessagesViewController: MSMessagesAppViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        createUIElements()
         setupUI()
         setupConversationObserver()
+    }
+    
+    // MARK: - UI Creation
+    private func createUIElements() {
+        // Create main scroll view
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        
+        // Create content view
+        let contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentView)
+        
+        // Create UI elements
+        modeSegmentedControl = UISegmentedControl(items: ["General", "Dating"])
+        modeSegmentedControl.selectedSegmentIndex = 0
+        modeSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
+        
+        genderSegmentedControl = UISegmentedControl(items: ["Male", "Female"])
+        genderSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
+        
+        opponentGenderSegmentedControl = UISegmentedControl(items: ["Male", "Female"])
+        opponentGenderSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
+        
+        chatTextView = UITextView()
+        chatTextView.text = "Paste or load your conversation here..."
+        chatTextView.font = UIFont.systemFont(ofSize: 16)
+        chatTextView.layer.borderColor = UIColor.systemGray4.cgColor
+        chatTextView.layer.borderWidth = 1
+        chatTextView.layer.cornerRadius = 8
+        chatTextView.translatesAutoresizingMaskIntoConstraints = false
+        
+        analyzeButton = UIButton(type: .system)
+        analyzeButton.setTitle("Analyze & Get AI Responses", for: .normal)
+        analyzeButton.backgroundColor = UIColor.systemBlue
+        analyzeButton.setTitleColor(.white, for: .normal)
+        analyzeButton.layer.cornerRadius = 8
+        analyzeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        loadingIndicator = UIActivityIndicatorView(style: .medium)
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        
+        responseStackView = UIStackView()
+        responseStackView.axis = .vertical
+        responseStackView.spacing = 8
+        responseStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add to content view
+        contentView.addSubview(modeSegmentedControl)
+        contentView.addSubview(genderSegmentedControl)
+        contentView.addSubview(opponentGenderSegmentedControl)
+        contentView.addSubview(chatTextView)
+        contentView.addSubview(analyzeButton)
+        contentView.addSubview(loadingIndicator)
+        contentView.addSubview(responseStackView)
+        
+        // Setup constraints
+        NSLayoutConstraint.activate([
+            // Scroll view constraints
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            // Content view constraints
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            // Mode segmented control
+            modeSegmentedControl.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            modeSegmentedControl.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            modeSegmentedControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            // Gender controls
+            genderSegmentedControl.topAnchor.constraint(equalTo: modeSegmentedControl.bottomAnchor, constant: 20),
+            genderSegmentedControl.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            genderSegmentedControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            opponentGenderSegmentedControl.topAnchor.constraint(equalTo: genderSegmentedControl.bottomAnchor, constant: 10),
+            opponentGenderSegmentedControl.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            opponentGenderSegmentedControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            // Text view
+            chatTextView.topAnchor.constraint(equalTo: opponentGenderSegmentedControl.bottomAnchor, constant: 20),
+            chatTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            chatTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            chatTextView.heightAnchor.constraint(equalToConstant: 120),
+            
+            // Analyze button
+            analyzeButton.topAnchor.constraint(equalTo: chatTextView.bottomAnchor, constant: 20),
+            analyzeButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            analyzeButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            analyzeButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            // Loading indicator
+            loadingIndicator.topAnchor.constraint(equalTo: analyzeButton.bottomAnchor, constant: 20),
+            loadingIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
+            // Response stack view
+            responseStackView.topAnchor.constraint(equalTo: loadingIndicator.bottomAnchor, constant: 20),
+            responseStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            responseStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            responseStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
+        ])
     }
     
     // MARK: - UI Setup
@@ -139,7 +249,7 @@ class MessagesViewController: MSMessagesAppViewController {
         UIPasteboard.general.string = responseText
         
         // Create and send message
-        if let conversation = activeConversation {
+        if let activeConv = activeConversation {
             let message = MSMessage()
             let layout = MSMessageTemplateLayout()
             layout.caption = "DapTalk AI Response"
@@ -147,7 +257,7 @@ class MessagesViewController: MSMessagesAppViewController {
             layout.image = UIImage(systemName: "message.fill")
             message.layout = layout
             
-            conversation.insert(message) { error in
+            activeConv.insert(message) { error in
                 if let error = error {
                     print("Error inserting message: \(error)")
                 } else {
@@ -178,15 +288,16 @@ class MessagesViewController: MSMessagesAppViewController {
     
     // MARK: - Conversation Loading
     private func loadRecentConversation() {
-        guard let conversation = activeConversation else { return }
+        guard let _ = activeConversation else { return }
         
         // Get recent messages from the conversation
-        var conversationText = ""
+        let conversationText = ""
         
         // Note: In a real implementation, you would need to access the conversation messages
         // For now, we'll use a placeholder
         if conversationText.isEmpty {
-            conversationText = "No recent conversation found. Please paste your conversation text manually."
+            // Could load recent messages here in the future
+            print("No recent conversation found. Please paste your conversation text manually.")
         }
         
         chatTextView.text = conversationText
@@ -314,7 +425,6 @@ class MessagesViewController: MSMessagesAppViewController {
         // Add new response buttons
         for (index, response) in responses.enumerated() {
             let button = UIButton(type: .system)
-            button.setTitle(response, for: .normal)
             button.setTitleColor(.systemBlue, for: .normal)
             button.titleLabel?.numberOfLines = 0
             button.titleLabel?.textAlignment = .left
@@ -323,7 +433,13 @@ class MessagesViewController: MSMessagesAppViewController {
             button.layer.cornerRadius = 8
             button.layer.borderColor = UIColor.systemGray4.cgColor
             button.layer.borderWidth = 1
-            button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+            
+            // Use configuration instead of deprecated contentEdgeInsets
+            var config = UIButton.Configuration.plain()
+            config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)
+            config.title = response
+            button.configuration = config
+            
             button.addTarget(self, action: #selector(responseButtonTapped), for: .touchUpInside)
             
             responseStackView.addArrangedSubview(button)
