@@ -24,7 +24,7 @@
 		<key>NSExtensionMainStoryboard</key>
 		<string>MainInterface</string>
 		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.message-payload-provider</string>
+		<string>com.apple.messages</string>
 	</dict>
 	<key>NSAppTransportSecurity</key>
 	<dict>
