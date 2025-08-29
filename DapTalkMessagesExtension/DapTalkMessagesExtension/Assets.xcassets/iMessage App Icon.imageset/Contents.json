@@ -1,44 +1,51 @@
 {
   "images" : [
     {
-      "size" : "29x29",
+      "filename" : "29.png",
       "idiom" : "iphone",
-      "filename" : "iMessage-App-29@2x.png",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "58.png",
+      "idiom" : "iphone",
       "scale" : "2x"
     },
     {
-      "size" : "29x29",
+      "filename" : "87.png",
       "idiom" : "iphone",
-      "filename" : "iMessage-App-29@3x.png",
       "scale" : "3x"
     },
     {
-      "size" : "60x45",
-      "idiom" : "iphone",
-      "filename" : "iMessage-App-60x45@2x.png",
-      "scale" : "2x"
-    },
-    {
-      "size" : "60x45",
-      "idiom" : "iphone",
-      "filename" : "iMessage-App-60x45@3x.png",
-      "scale" : "3x"
-    },
-    {
-      "size" : "67x50",
+      "filename" : "29 1.png",
       "idiom" : "ipad",
-      "filename" : "iMessage-App-67x50@2x.png",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "58 1.png",
+      "idiom" : "ipad",
       "scale" : "2x"
     },
     {
-      "size" : "74x55",
+      "filename" : "120x90.png",
+      "idiom" : "iphone",
+      "scale" : "2x",
+      "unassigned" : true
+    },
+    {
+      "filename" : "134x100.png",
+      "idiom" : "iphone",
+      "scale" : "3x",
+      "unassigned" : true
+    },
+    {
+      "filename" : "180x135.png",
       "idiom" : "ipad",
-      "filename" : "iMessage-App-74x55@2x.png",
-      "scale" : "2x"
+      "scale" : "2x",
+      "unassigned" : true
     }
   ],
   "info" : {
-    "version" : 1,
-    "author" : "xcode"
+    "author" : "xcode",
+    "version" : 1
   }
 }
