@@ -5,9 +5,9 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleDisplayName</key>
-	<string>DapTalk Messages</string>
+	<string>Chat Assistant Messages</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.ccomkim80.daptalk.extension</string>
+	<string>com.ccomkim80.chatassist.extension</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
