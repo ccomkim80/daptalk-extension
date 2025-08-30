@@ -12,6 +12,7 @@
 		A1234567890ABCDEF005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF006 /* Assets.xcassets */; };
 		A1234567890ABCDEF007 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF008 /* Config.plist */; };
 		A1234567890ABCDEF00A /* DapTalkMessagesExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF00B /* DapTalkMessagesExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1234567890ABCDEF01E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF018 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,8 +47,8 @@
 		A1234567890ABCDEF00B /* DapTalkMessagesExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DapTalkMessagesExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1234567890ABCDEF010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1234567890ABCDEF011 /* DapTalkHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DapTalkHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1234567890ABCDEF012 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		A1234567890ABCDEF013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1234567890ABCDEF018 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A1234567890ABCDEF019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,10 +60,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1234567890ABCDEF01A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1234567890ABCDEF013 = {
+		A1234567890ABCDEF017 = {
 			isa = PBXGroup;
 			children = (
 				A1234567890ABCDEF014 /* DapTalkMessagesExtension */,
@@ -86,8 +94,8 @@
 		A1234567890ABCDEF015 /* DapTalkHost */ = {
 			isa = PBXGroup;
 			children = (
-				A1234567890ABCDEF012 /* AppDelegate.swift */,
-				A1234567890ABCDEF013 /* Info.plist */,
+				A1234567890ABCDEF018 /* AppDelegate.swift */,
+				A1234567890ABCDEF019 /* Info.plist */,
 			);
 			path = DapTalkHost;
 			sourceTree = "<group>";
@@ -134,6 +142,7 @@
 			buildConfigurationList = A1234567890ABCDEF01C /* Build configuration list for PBXNativeTarget "DapTalkHost" */;
 			buildPhases = (
 				A1234567890ABCDEF01D /* Sources */,
+				A1234567890ABCDEF01A /* Frameworks */,
 				A1234567890ABCDEF01F /* Resources */,
 				A1234567890ABCDEF00F /* Embed App Extensions */,
 			);
@@ -215,6 +224,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1234567890ABCDEF01E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
