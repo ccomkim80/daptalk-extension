@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>DapTalk Messages</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.ccomkim80.daptalk.extension</string>
 	<key>CFBundleInfoDictionaryVersion</key>
