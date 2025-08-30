@@ -11,11 +11,26 @@ class MessagesViewController: MSMessagesAppViewController {
     private var genderSegmentedControl: UISegmentedControl!
     private var opponentGenderSegmentedControl: UISegmentedControl!
     private var analyzeButton: UIButton!
+    private var scrollView: UIScrollView!
+    private var contentView: UIView!
+    
+    // User preferences
+    private let userDefaults = UserDefaults.standard
+    private var cachedResponses: [String: [String]] = [:]
+    private var isOnline: Bool = true
     
     private var currentMode: ChatMode = .general
     private var userGender: Gender = .none
     private var opponentGender: Gender = .none
-    private let geminiAPIKey = "AIzaSyCPOkqRbG_H-Uybu5S25uHw-qkrTiAJ0IQ"
+    
+    private var geminiAPIKey: String {
+        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+              let dict = NSDictionary(contentsOfFile: path),
+              let key = dict["GeminiAPIKey"] as? String else {
+            fatalError("Gemini API Key not found in Config.plist")
+        }
+        return key
+    }
     
     enum ChatMode: Int, CaseIterable {
         case general = 0
@@ -49,17 +64,29 @@ class MessagesViewController: MSMessagesAppViewController {
         createUIElements()
         setupUI()
         setupConversationObserver()
+        setupKeyboardObservers()
+        loadUserPreferences()
+        checkNetworkStatus()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        saveUserPreferences()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - UI Creation
     private func createUIElements() {
         // Create main scroll view
-        let scrollView = UIScrollView()
+        scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         
         // Create content view
-        let contentView = UIView()
+        contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
         
@@ -188,6 +215,9 @@ class MessagesViewController: MSMessagesAppViewController {
         // Configure loading indicator
         loadingIndicator.hidesWhenStopped = true
         
+        // Setup accessibility
+        setupAccessibility()
+        
         updateUIForMode()
     }
     
@@ -309,11 +339,38 @@ class MessagesViewController: MSMessagesAppViewController {
         analyzeButton.isEnabled = false
         
         let conversationText = chatTextView.text ?? ""
+        
+        // Check for cached responses first
+        if let cached = getCachedResponses(for: conversationText) {
+            displayResponses(cached)
+            loadingIndicator.stopAnimating()
+            analyzeButton.isEnabled = true
+            return
+        }
+        
+        // Check if offline
+        if !isOnline {
+            let offlineResponses = [
+                "I understand your situation. Let me think about this...",
+                "That's an interesting point. Here's my perspective...",
+                "I can see where you're coming from. Consider this...",
+                "Thanks for sharing. Here's what I would suggest..."
+            ]
+            displayResponses(offlineResponses)
+            loadingIndicator.stopAnimating()
+            analyzeButton.isEnabled = true
+            return
+        }
+        
         let prompt = buildPrompt(for: conversationText)
         
         Task {
             do {
                 let responses = try await fetchAIResponses(prompt: prompt)
+                
+                // Cache the responses
+                self.cacheResponses(responses, for: conversationText)
+                
                 await MainActor.run {
                     self.displayResponses(responses)
                     self.loadingIndicator.stopAnimating()
@@ -491,5 +548,153 @@ class MessagesViewController: MSMessagesAppViewController {
     override func willTransition(to presentationStyle: MSMessagesAppPresentationStyle) {
         super.willTransition(to: presentationStyle)
         // Handle presentation style changes
+        updateUIForPresentationStyle(presentationStyle)
+    }
+    
+    // MARK: - Keyboard Handling
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = keyboardFrame.height
+        scrollView.contentInset.bottom = keyboardHeight
+        scrollView.scrollIndicatorInsets.bottom = keyboardHeight
+        
+        // Scroll to text view if it's being edited
+        if chatTextView.isFirstResponder {
+            scrollView.scrollRectToVisible(chatTextView.frame, animated: true)
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        scrollView.contentInset.bottom = 0
+        scrollView.scrollIndicatorInsets.bottom = 0
+    }
+    
+    // MARK: - User Preferences
+    private func saveUserPreferences() {
+        userDefaults.set(currentMode.rawValue, forKey: "selectedMode")
+        userDefaults.set(userGender.rawValue, forKey: "userGender")
+        userDefaults.set(opponentGender.rawValue, forKey: "opponentGender")
+        
+        // Save cached responses
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(cachedResponses) {
+            userDefaults.set(encoded, forKey: "cachedResponses")
+        }
+    }
+    
+    private func loadUserPreferences() {
+        // Load mode
+        let savedMode = userDefaults.integer(forKey: "selectedMode")
+        currentMode = ChatMode(rawValue: savedMode) ?? .general
+        modeSegmentedControl?.selectedSegmentIndex = currentMode.rawValue
+        
+        // Load genders
+        let savedUserGender = userDefaults.integer(forKey: "userGender")
+        userGender = Gender(rawValue: savedUserGender) ?? .none
+        if userGender != .none {
+            genderSegmentedControl?.selectedSegmentIndex = userGender.rawValue
+        }
+        
+        let savedOpponentGender = userDefaults.integer(forKey: "opponentGender")
+        opponentGender = Gender(rawValue: savedOpponentGender) ?? .none
+        if opponentGender != .none {
+            opponentGenderSegmentedControl?.selectedSegmentIndex = opponentGender.rawValue
+        }
+        
+        // Load cached responses
+        if let savedData = userDefaults.data(forKey: "cachedResponses"),
+           let decoded = try? JSONDecoder().decode([String: [String]].self, from: savedData) {
+            cachedResponses = decoded
+        }
+        
+        updateUIForMode()
+    }
+    
+    // MARK: - Network Status
+    private func checkNetworkStatus() {
+        // Simple network check
+        var request = URLRequest(url: URL(string: "https://www.google.com")!)
+        request.timeoutInterval = 5.0
+        
+        URLSession.shared.dataTask(with: request) { [weak self] _, _, error in
+            DispatchQueue.main.async {
+                self?.isOnline = error == nil
+                self?.updateUIForNetworkStatus()
+            }
+        }.resume()
+    }
+    
+    private func updateUIForNetworkStatus() {
+        if !isOnline {
+            analyzeButton.setTitle("Analyze (Offline Mode)", for: .normal)
+            analyzeButton.backgroundColor = UIColor.systemOrange
+        } else {
+            analyzeButton.setTitle("Analyze & Get AI Responses", for: .normal)
+            analyzeButton.backgroundColor = UIColor.systemBlue
+        }
+    }
+    
+    // MARK: - Response Caching
+    private func getCachedResponses(for text: String) -> [String]? {
+        let key = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return cachedResponses[key]
+    }
+    
+    private func cacheResponses(_ responses: [String], for text: String) {
+        let key = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        cachedResponses[key] = responses
+        
+        // Limit cache size to prevent memory issues
+        if cachedResponses.count > 50 {
+            let oldestKey = cachedResponses.keys.first
+            cachedResponses.removeValue(forKey: oldestKey!)
+        }
+    }
+    
+    // MARK: - Presentation Style Handling
+    private func updateUIForPresentationStyle(_ style: MSMessagesAppPresentationStyle) {
+        switch style {
+        case .compact:
+            // Compact mode - show simplified UI
+            genderSegmentedControl.isHidden = true
+            opponentGenderSegmentedControl.isHidden = true
+        case .expanded:
+            // Expanded mode - show full UI
+            updateUIForMode()
+        @unknown default:
+            break
+        }
+    }
+    
+    // MARK: - Accessibility
+    private func setupAccessibility() {
+        modeSegmentedControl.accessibilityLabel = "Chat mode selection"
+        modeSegmentedControl.accessibilityHint = "Choose between general and dating conversation modes"
+        
+        genderSegmentedControl.accessibilityLabel = "Your gender"
+        opponentGenderSegmentedControl.accessibilityLabel = "Opponent's gender"
+        
+        chatTextView.accessibilityLabel = "Conversation text"
+        chatTextView.accessibilityHint = "Enter or paste the conversation you want to analyze"
+        
+        analyzeButton.accessibilityLabel = "Analyze conversation"
+        analyzeButton.accessibilityHint = "Generate AI response suggestions for the conversation"
     }
 }

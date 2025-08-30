@@ -10,6 +10,7 @@
 		A1234567890ABCDEF001 /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF002 /* MessagesViewController.swift */; };
 		A1234567890ABCDEF003 /* Messages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF004 /* Messages.framework */; };
 		A1234567890ABCDEF005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF006 /* Assets.xcassets */; };
+		A1234567890ABCDEF007 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF008 /* Config.plist */; };
 		A1234567890ABCDEF00A /* DapTalkMessagesExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF00B /* DapTalkMessagesExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 		A1234567890ABCDEF002 /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF004 /* Messages.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Messages.framework; path = System/Library/Frameworks/Messages.framework; sourceTree = SDKROOT; };
 		A1234567890ABCDEF006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A1234567890ABCDEF008 /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
 		A1234567890ABCDEF00B /* DapTalkMessagesExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DapTalkMessagesExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1234567890ABCDEF010 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1234567890ABCDEF011 /* DapTalkHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DapTalkHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +75,7 @@
 			children = (
 				A1234567890ABCDEF002 /* MessagesViewController.swift */,
 				A1234567890ABCDEF006 /* Assets.xcassets */,
+				A1234567890ABCDEF008 /* Config.plist */,
 				A1234567890ABCDEF010 /* Info.plist */,
 			);
 			path = DapTalkMessagesExtension;
