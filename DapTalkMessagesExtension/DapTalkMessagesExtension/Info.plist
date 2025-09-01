@@ -29,6 +29,8 @@
 		<string>MessagesViewController</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.message-payload-provider</string>
+		<key>MSMessagesExtensionStoreIconName</key>
+		<string>iMessage App Icon</string>
 	</dict>
 </dict>
 </plist>
