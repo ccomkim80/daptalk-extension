@@ -11,8 +11,7 @@ import {
   Image,
   Animated,
   Dimensions,
-  Linking,
-  Modal
+  Linking
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
@@ -24,18 +23,8 @@ const GOOGLE_AI_API_KEY = 'AIzaSyCPOkqRbG_H-Uybu5S25uHw-qkrTiAJ0IQ';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// Simulated payment functions (for now, until Google Play Billing setup)
-const initializeIAP = async () => {
-  console.log('Payment system initialized (simulation mode)');
-};
-
-const purchasePremium = async () => {
-  console.log('Premium purchase simulation');
-  return { success: true };
-};
-
 // Chat Assistant App Component
-function ChatAssistantApp() {
+function DapTalkApp() {
   const [showSplash, setShowSplash] = useState(true);
   const [inputMessage, setInputMessage] = useState('');
   const [selectedImages, setSelectedImages] = useState([]); // Changed to multiple image array
@@ -53,12 +42,6 @@ function ChatAssistantApp() {
   const [showIntentAnalysis, setShowIntentAnalysis] = useState(false); // Whether to show intent analysis
   const [userSpeechStyle, setUserSpeechStyle] = useState(''); // User speech style analysis result
   const [intentAnalysis, setIntentAnalysis] = useState(''); // Opponent intent analysis result
-
-  // Premium related state
-  const [isPremium, setIsPremium] = useState(false);
-  const [dailyUsageCount, setDailyUsageCount] = useState(0);
-  const [lastUsageDate, setLastUsageDate] = useState('');
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Animation values
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -90,12 +73,6 @@ function ChatAssistantApp() {
 
     // Load saved user settings on app start
     loadUserSettings();
-    
-    // Load premium status and usage
-    loadPremiumStatus();
-    
-    // Initialize Google Play Billing
-    initializeIAP();
 
     return () => clearTimeout(splashTimer);
   }, []);
@@ -124,38 +101,6 @@ function ChatAssistantApp() {
       }
     } catch (error) {
       console.error('Error loading user settings:', error);
-    }
-  };
-
-  // Load premium status and usage
-  const loadPremiumStatus = async () => {
-    try {
-      const premiumStatus = await AsyncStorage.getItem('premiumStatus');
-      const usageData = await AsyncStorage.getItem('dailyUsage');
-      
-      if (premiumStatus) {
-        setIsPremium(JSON.parse(premiumStatus));
-      }
-      
-      if (usageData) {
-        const usage = JSON.parse(usageData);
-        const today = new Date().toDateString();
-        
-        if (usage.date === today) {
-          setDailyUsageCount(usage.count);
-          setLastUsageDate(usage.date);
-        } else {
-          // Reset count if it's a new day
-          setDailyUsageCount(0);
-          setLastUsageDate(today);
-          await AsyncStorage.setItem('dailyUsage', JSON.stringify({
-            date: today,
-            count: 0
-          }));
-        }
-      }
-    } catch (error) {
-      console.error('Error loading premium status:', error);
     }
   };
 
@@ -195,87 +140,6 @@ function ChatAssistantApp() {
   // Opponent gender change handler (dating mode)
   const handleOpponentGenderChange = (gender) => {
     setOpponentGender(gender);
-  };
-
-  // Increase daily usage
-  const incrementDailyUsage = async () => {
-    const today = new Date().toDateString();
-    const newCount = dailyUsageCount + 1;
-    
-    setDailyUsageCount(newCount);
-    setLastUsageDate(today);
-    
-    await AsyncStorage.setItem('dailyUsage', JSON.stringify({
-      date: today,
-      count: newCount
-    }));
-  };
-
-  // Handle premium purchase (simulation mode)
-  const handlePremiumPurchase = async (paymentMethod) => {
-    try {
-        Alert.alert(
-          'Payment Confirmation',
-          `Proceed with a monthly payment of 2,000 KRW?`,
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel'
-            },
-            {
-              text: 'Pay',
-              onPress: async () => {
-                setLoading(true);
-                
-                try {
-                  // Simulate payment processing
-                  setTimeout(async () => {
-                    setIsPremium(true);
-                    await AsyncStorage.setItem('premiumStatus', JSON.stringify(true));
-                    setShowPremiumModal(false);
-                    setLoading(false);
-                  
-                    Alert.alert(
-                      'Payment Complete!',
-                      'Premium subscription activated!\nYou can now receive unlimited answers.',
-                      [{ text: 'OK' }]
-                    );
-                  }, 2000);
-                } catch (error) {
-                  console.error('Payment error:', error);
-                  setLoading(false);
-                  Alert.alert('Error', 'An error occurred during payment processing.');
-                }
-              }
-            }
-          ]
-        );
-    } catch (error) {
-      console.error('Payment error:', error);
-      Alert.alert('Error', 'An error occurred during payment processing.');
-    }
-  };
-
-  // Check usage limit
-  const checkUsageLimit = () => {
-    if (isPremium) {
-      return true; // Premium users have unlimited usage
-    }
-    
-    const today = new Date().toDateString();
-    if (lastUsageDate !== today) {
-      // Reset count if it's a new day
-      setDailyUsageCount(0);
-      setLastUsageDate(today);
-      return true;
-    }
-    
-    if (dailyUsageCount >= 3) { // Changed from 1 to 3
-      setShowPremiumModal(true);
-      return false;
-    }
-    
-    return true;
   };
 
   useEffect(() => {
@@ -900,11 +764,6 @@ Me: [Second message sent by me]
 
   // Multiple image OCR processing function (modified)
   const processMultipleImagesOCR = async (imageAssets = selectedImages) => {
-    // Check usage limit
-    if (!checkUsageLimit()) {
-      return;
-    }
-
     if (!GOOGLE_AI_API_KEY || GOOGLE_AI_API_KEY.length < 10) {
       Alert.alert('Setup Required', 'Please set up your Google AI API key.');
       return;
@@ -1177,9 +1036,6 @@ Me: [Second message sent by me]
         setAiReplies(fallbackReplies);
       }
       
-      // Increment usage if responses were successfully generated
-      await incrementDailyUsage();
-
       Alert.alert('Complete', 'Chat content has been analyzed and responses generated!');
       console.log('Multiple image OCR and response generation completed');
 
@@ -1193,11 +1049,6 @@ Me: [Second message sent by me]
 
   // AI response generation through text input (unified function)
   const generateReplies = async () => {
-    // 사용량 제한 확인
-    if (!checkUsageLimit()) {
-      return;
-    }
-
     // 이미지가 있으면 다중 이미지 처리를 우선 실행
     if (selectedImages.length > 0) {
       await processMultipleImagesOCR();
@@ -1317,9 +1168,6 @@ ${personalizedStyles[3].prompt}
 
       setAiReplies(replies);
       
-      // 성공적으로 답변을 생성했으면 사용량 증가
-      await incrementDailyUsage();
-      
       console.log('All responses generated successfully');
     } catch (error) {
       console.error('상세 AI Error:', error);
@@ -1331,11 +1179,6 @@ ${personalizedStyles[3].prompt}
 
   // AI response regeneration function for edited conversation (newly added)
   const regenerateRepliesFromEditedChat = async () => {
-    // 사용량 제한 확인
-    if (!checkUsageLimit()) {
-      return;
-    }
-
     if (extractedMessages.length === 0) {
       Alert.alert('Notice', 'No conversation content to edit.');
       return;
@@ -1450,9 +1293,6 @@ ${personalizedStyles[3].prompt}
       }
 
       setAiReplies(replies);
-      
-      // Increment usage if responses were successfully generated
-      await incrementDailyUsage();
       
       console.log('AI response regeneration from edited conversation completed');
       Alert.alert('Complete', 'New responses have been generated based on the edited conversation!');
@@ -1644,66 +1484,6 @@ ${personalizedStyles[3].prompt}
     </View>
   );
 
-  // 프리미엄 모달 컴포넌트
-  const PremiumModal = () => (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={showPremiumModal}
-      onRequestClose={() => setShowPremiumModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <ScrollView 
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.modalScrollContent}
-          >
-            <Text style={styles.modalTitle}>💎 Premium Subscription</Text>
-            <Text style={styles.modalSubtitle}>Today's free usage is finished</Text>
-            
-            <View style={styles.modalContent}>
-      <Text style={styles.modalDescription}>
-        🆓 Free: 3 times per day{'\n'} 
-        💎 Premium: Unlimited usage
-      </Text>
-              
-              <View style={styles.pricingBox}>
-                <Text style={styles.priceText}>2,000 KRW/month</Text>
-                <Text style={styles.priceDescription}>Cancel anytime</Text>
-              </View>
-              
-              <View style={styles.paymentMethods}>
-                <Text style={styles.paymentTitle}>Select payment method</Text>
-                  <TouchableOpacity 
-                    style={styles.paymentButton} 
-                    onPress={() => handlePremiumPurchase('Google Pay')}
-                    disabled={loading}
-                  >
-                    <Text style={styles.paymentButtonText}>🔴 Google Pay</Text>
-                  </TouchableOpacity>
-              </View>
-              
-              {loading && (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#FFD4B3" />
-                  <Text style={styles.loadingText}>Processing payment...</Text>
-                </View>
-              )}
-              
-              <TouchableOpacity 
-                style={styles.modalCloseButton} 
-                onPress={() => setShowPremiumModal(false)}
-                disabled={loading}
-              >
-                <Text style={styles.modalCloseText}>Later</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
-  );
-
   // Show splash screen while loading
   if (showSplash) {
     return <SplashScreen />;
@@ -1876,26 +1656,6 @@ ${personalizedStyles[3].prompt}
                     💬 Analyzed Speech Style: {userSpeechStyle}
                   </Text>
                 )}
-                
-                {/* Subscription status display */}
-                <View style={styles.subscriptionStatus}>
-                  <Text style={[styles.subscriptionText, isPremium ? styles.premiumText : styles.freeText]}>
-                    {isPremium ? '💎 Premium Subscribed' : '🆓 Free Version'}
-                  </Text>
-                  {!isPremium && (
-                    <Text style={styles.usageText}>
-                      Today's usage: {dailyUsageCount}/3 times
-                    </Text>
-                  )}
-                  {!isPremium && (
-                    <TouchableOpacity 
-                      style={styles.upgradeButton} 
-                      onPress={() => setShowPremiumModal(true)}
-                    >
-                      <Text style={styles.upgradeButtonText}>Subscribe to Premium</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
               </View>
             </View>
           )}
@@ -2185,9 +1945,6 @@ ${personalizedStyles[3].prompt}
         </TouchableOpacity>
 
       </Animated.ScrollView>
-      
-      {/* Premium modal */}
-      <PremiumModal />
     </View>
   );
 }
@@ -2910,15 +2667,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   
-  // 프리미엄 모달 스타일
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContainer: {
+  // 모드 토글 스타일
+  modeToggle: {
     backgroundColor: '#1c1c1e',
     borderRadius: 20,
     padding: 25,
@@ -3829,5 +3579,5 @@ const styles = StyleSheet.create({
   },
 });
 
-// Export ChatAssistantApp directly (Google Play Billing only)
-export default ChatAssistantApp;
+// Export DapTalkApp directly (Google Play Billing only)
+export default DapTalkApp;

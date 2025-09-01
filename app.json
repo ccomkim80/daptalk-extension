@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Chat Assistant",
-    "slug": "chatassist",
+    "name": "DapTalk",
+    "slug": "daptalk",
     "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ccomkim80.chatassist"
+      "bundleIdentifier": "com.ccomkim80.daptalk"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.chatassist.app",
+      "package": "com.daptalk.app",
       "versionCode": 2,
       "permissions": [
         "CAMERA",

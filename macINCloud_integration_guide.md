@@ -54,18 +54,18 @@ npx expo prebuild --platform ios --clean
 ## 3단계: iMessage Extension 통합
 
 ### Extension Target 추가
-1. `ios/chatassist.xcworkspace` 열기
+1. `ios/daptalk.xcworkspace` 열기
 2. 프로젝트 파일 선택
 3. Targets 섹션에서 "+" 클릭
 4. "Messages Extension" 선택
-5. Product Name: "ChatAssistantMessages"
-6. Bundle Identifier: "com.ccomkim80.chatassist.extension"
+5. Product Name: "DapTalkMessages"
+6. Bundle Identifier: "com.ccomkim80.daptalk.extension"
 
 ### 기존 Extension 파일 복사
 ```bash
 # Extension 소스 파일 복사
-cp DapTalkMessagesExtension/DapTalkMessagesExtension/MessagesViewController.swift ios/ChatAssistantMessages/
-cp DapTalkMessagesExtension/DapTalkMessagesExtension/Config.plist ios/ChatAssistantMessages/
+cp DapTalkMessagesExtension/DapTalkMessagesExtension/MessagesViewController.swift ios/DapTalkMessages/
+cp DapTalkMessagesExtension/DapTalkMessagesExtension/Config.plist ios/DapTalkMessages/
 ```
 
 ### Info.plist 설정
@@ -81,8 +81,8 @@ Extension의 Info.plist에 추가:
 ## 4단계: Bundle ID 및 설정
 
 ### Bundle ID 구조
-- Main App: `com.ccomkim80.chatassist`
-- Extension: `com.ccomkim80.chatassist.extension`
+- Main App: `com.ccomkim80.daptalk`
+- Extension: `com.ccomkim80.daptalk.extension`
 
 ### Capabilities 추가
 1. Main App Target 선택

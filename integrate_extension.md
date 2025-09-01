@@ -19,12 +19,12 @@ npx expo prebuild --platform ios --clean
 
 ```bash
 # 3. 기존 Extension을 새 프로젝트로 복사
-cp -r DapTalkMessagesExtension/DapTalkMessagesExtension ios/chatassist.xcworkspace/
+cp -r DapTalkMessagesExtension/DapTalkMessagesExtension ios/daptalk.xcworkspace/
 ```
 
 ### 3. Xcode에서 Extension Target 추가
 
-1. `ios/chatassist.xcworkspace` 열기
+1. `ios/daptalk.xcworkspace` 열기
 2. 프로젝트 네비게이터에서 프로젝트 루트 선택
 3. "+" 버튼으로 새 Target 추가
 4. "Messages Extension" 선택
@@ -32,8 +32,8 @@ cp -r DapTalkMessagesExtension/DapTalkMessagesExtension ios/chatassist.xcworkspa
 
 ### 4. Bundle ID 설정
 
-- **Main App**: `com.ccomkim80.chatassist`
-- **Extension**: `com.ccomkim80.chatassist.extension`
+- **Main App**: `com.ccomkim80.daptalk`
+- **Extension**: `com.ccomkim80.daptalk.extension`
 
 ### 5. Info.plist 설정
 
@@ -74,8 +74,8 @@ cp -r DapTalkMessagesExtension/DapTalkMessagesExtension ios/chatassist.xcworkspa
 ## Bundle ID 구조
 
 ```
-com.ccomkim80.chatassist (Main App)
-└── com.ccomkim80.chatassist.extension (iMessage Extension)
+com.ccomkim80.daptalk (Main App)
+└── com.ccomkim80.daptalk.extension (iMessage Extension)
 ```
 
 이렇게 하면 React Native 앱이 호스트가 되고, iMessage Extension이 포함된 완전한 앱이 됩니다.
