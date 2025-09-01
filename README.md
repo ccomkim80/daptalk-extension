@@ -1,4 +1,158 @@
-# DapTalk iMessage Extension 
+# 🚀 DapTalk - AI-Powered iMessage Extension
+
+[![iOS](https://img.shields.io/badge/iOS-14.0+-blue.svg)](https://developer.apple.com/ios/)
+[![Swift](https://img.shields.io/badge/Swift-5.0+-orange.svg)](https://swift.org/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.74+-61DAFB.svg)](https://reactnative.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+DapTalk is an AI-powered chat assistant that integrates seamlessly with iMessage, providing intelligent response suggestions for both general conversations and dating scenarios.
+
+## ✨ **Features**
+
+### 🧠 **Intelligent AI Responses**
+- **Google Gemini AI Integration** - Advanced language understanding
+- **4 Response Styles** - Formal, casual, empathetic, and direct options
+- **Context-Aware** - Analyzes conversation flow and tone
+- **Unlimited Usage** - No subscription or payment required
+
+### 💬 **Dual Chat Modes**
+- **General Mode** - Everyday conversation assistance
+- **Dating Mode** - Romantic and flirty response suggestions
+- **Gender Personalization** - Tailored responses based on user preferences
+
+### 📱 **iMessage Integration**
+- **Native Extension** - Works directly within Messages app
+- **Real-time Analysis** - Instant conversation analysis
+- **One-Tap Responses** - Select and send AI-generated replies
+- **Privacy-Focused** - No conversation data stored
+
+### 🎯 **Additional Features**
+- **OCR Image Analysis** - Extract text from chat screenshots (main app)
+- **Conversation Editing** - Modify and regenerate responses
+- **Intent Analysis** - Understand conversation dynamics
+- **Cross-Platform** - iPhone and iPad support
+
+## 🛠 **Installation**
+
+### **For Testing (TestFlight)**
+1. Download TestFlight from the App Store
+2. Accept the beta invitation email
+3. Install DapTalk through TestFlight
+4. Enable the extension in Messages → App Store → Manage
+
+### **For Development**
+```bash
+# Clone the repository
+git clone https://github.com/ccomkim80/daptalk-extension.git
+cd daptalk-extension
+
+# Install dependencies
+npm install
+
+# iOS Setup
+cd ios && pod install && cd ..
+
+# Run on simulator
+npm run ios
+```
+
+## 🔧 **Setup Requirements**
+
+### **Google Gemini API Key**
+1. Get API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Update in both locations:
+   - `App.js` → `GOOGLE_AI_API_KEY`
+   - `DapTalkMessagesExtension/DapTalkMessagesExtension/Config.plist`
+
+### **Apple Developer Account**
+- Required for iMessage Extension deployment
+- Configure proper Bundle IDs and code signing
+
+## 📋 **Project Structure**
+
+```
+daptalk-extension/
+├── App.js                          # Main React Native app
+├── app.json                        # Expo configuration
+├── assets/                         # App icons and images
+├── DapTalkMessagesExtension/       # Xcode project for iMessage extension
+│   ├── DapTalkHost/               # Host app (container)
+│   ├── DapTalkMessagesExtension/  # iMessage extension code
+│   └── *.xcodeproj                # Xcode project file
+├── integrate_extension.md          # Integration guide
+├── macINCloud_integration_guide.md # MacInCloud setup guide
+└── RELEASE_NOTES.md               # Version history
+```
+
+## 🚀 **How to Use**
+
+### **Main App**
+1. Launch DapTalk
+2. Choose General or Dating mode
+3. Set your gender preferences
+4. Input conversation text or upload screenshot
+5. Get 4 AI-generated response options
+6. Copy your preferred response
+
+### **iMessage Extension**
+1. Open Messages app
+2. Start or continue a conversation
+3. Tap the App Store icon (🔴) next to text input
+4. Select "DapTalk Messages"
+5. Paste conversation context
+6. Choose mode and set preferences
+7. Tap "Analyze" for AI suggestions
+8. Select and send your preferred response
+
+## 🔥 **Key Technologies**
+
+- **Frontend**: React Native + Expo
+- **AI Engine**: Google Gemini 1.5 Flash
+- **iOS Extension**: Swift + Messages Framework
+- **Storage**: AsyncStorage for preferences
+- **Image Processing**: Expo ImagePicker + OCR
+- **Deployment**: Xcode + TestFlight
+
+## 📈 **Version History**
+
+### v1.0.0 (September 2025)
+- ✅ Complete app rebranding (ChatAssist → DapTalk)
+- ✅ Removed all payment/subscription features
+- ✅ Integrated iMessage extension with host app
+- ✅ Unified Bundle ID hierarchy
+- ✅ Google Gemini AI integration
+- ✅ Ready for TestFlight deployment
+
+See [RELEASE_NOTES.md](RELEASE_NOTES.md) for detailed changes.
+
+## 🤝 **Contributing**
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 **Acknowledgments**
+
+- Google Gemini AI for powerful language processing
+- React Native community for excellent mobile development tools
+- Apple Messages framework for seamless iMessage integration
+
+## 📞 **Support**
+
+For questions, issues, or feature requests:
+- 📧 Email: [your-email@example.com]
+- 🐛 Issues: [GitHub Issues](https://github.com/ccomkim80/daptalk-extension/issues)
+- 📖 Documentation: [Project Wiki](https://github.com/ccomkim80/daptalk-extension/wiki)
+
+---
+
+**DapTalk** - Making every conversation better with AI 🤖💬✨ 
 
 daptalk iOS 앱을 기반으로 한 iMessage Extension 프로젝트입니다.
 
