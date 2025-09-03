@@ -364,6 +364,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F9C8ZFQT4N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DapTalkMessagesExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -386,6 +387,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F9C8ZFQT4N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DapTalkMessagesExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -410,6 +412,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F9C8ZFQT4N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DapTalkHost/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -435,6 +438,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F9C8ZFQT4N;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DapTalkHost/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
