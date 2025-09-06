@@ -23,6 +23,44 @@ const GOOGLE_AI_API_KEY = 'AIzaSyCPOkqRbG_H-Uybu5S25uHw-qkrTiAJ0IQ';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
+// Helper functions moved outside component for better performance
+// Function to convert image to Base64
+const convertImageToBase64 = async (uri) => {
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1]; // Remove 'data:image/jpeg;base64,' part
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    throw new Error('Error occurred while converting image.');
+  }
+};
+
+// Determine MIME type from file extension
+const getMimeTypeFromUri = (uri) => {
+  const extension = uri.toLowerCase().split('.').pop();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    default:
+      return 'image/jpeg'; // Default value
+  }
+};
+
 // Chat Assistant App Component
 function DapTalkApp() {
   const [showSplash, setShowSplash] = useState(true);
@@ -162,43 +200,6 @@ function DapTalkApp() {
     }
   }, [aiReplies]);
 
-  // Function to convert image to Base64
-  const convertImageToBase64 = async (uri) => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result.split(',')[1]; // Remove 'data:image/jpeg;base64,' part
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      throw new Error('Error occurred while converting image.');
-    }
-  };
-
-  // Determine MIME type from file extension
-  const getMimeTypeFromUri = (uri) => {
-    const extension = uri.toLowerCase().split('.').pop();
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      default:
-        return 'image/jpeg'; // Default value
-    }
-  };
-
   // Speech style by age group
   const getAgeStyle = (age) => {
     switch (age) {
@@ -217,68 +218,76 @@ function DapTalkApp() {
     }
   };
 
-  // Generate speech style for dating mode
-  const generateRomanceStyles = () => {
-    const genderStyle = userGender === 'male' ? 'masculine and' : userGender === 'female' ? 'feminine and' : '';
-    const ageStyle = getAgeStyle(userAge);
-    const speechStyleGuide = userSpeechStyle ? `User's existing speech characteristics: "${userSpeechStyle}". Reflecting these characteristics` : '';
-    const intentGuide = intentAnalysis ? `Opponent's intent analysis: "${intentAnalysis}". Responding appropriately to this intent` : '';
-    const opponentInfo = opponentGender ? `The opponent is ${opponentGender === 'male' ? 'male' : 'female'}.` : '';
+  // Generate personalized speech styles based on user profile (optimized)
+  const generatePersonalizedStyles = () => {
+    const baseContext = {
+      genderStyle: userGender === 'male' ? 'masculine and' : userGender === 'female' ? 'feminine and' : '',
+      ageStyle: getAgeStyle(userAge),
+      speechStyleGuide: userSpeechStyle ? `User's existing speech characteristics: "${userSpeechStyle}". Reflecting these characteristics` : '',
+      intentGuide: intentAnalysis ? `Opponent's intent analysis: "${intentAnalysis}". Responding appropriately to this intent` : ''
+    };
+
+    if (isRomanceMode) {
+      return generateRomanceStyles(baseContext);
+    }
     
-    // Gender-specific speech guide
+    return generateFriendlyStyles(baseContext);
+  };
+
+  // Romance mode styles (separated for better organization)
+  const generateRomanceStyles = (context) => {
+    const { genderStyle, ageStyle, speechStyleGuide, intentGuide } = context;
+    const opponentInfo = opponentGender ? `The opponent is ${opponentGender === 'male' ? 'male' : 'female'}.` : '';
     const genderSpecificGuide = userGender === 'male' && opponentGender === 'female' ? 
-      'Use natural expressions and titles that men use for women. Never use titles like "oppa" that women use for men.' :
+      'Use natural expressions that men use for women.' :
       userGender === 'female' && opponentGender === 'male' ?
-      'Use natural expressions and titles that women use for men.' :
-      '';
+      'Use natural expressions that women use for men.' : '';
+    
+    const basePrompt = `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide}`;
+    const criticalNote = '**CRITICAL**: You MUST write ONLY the actual message text. Do NOT write any analysis or explanations.';
     
     return [
       {
         name: 'Interest Expression Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that subtly shows romantic interest and curiosity about the other person. Use warm, engaging language that invites more conversation. ${userGender === 'male' && opponentGender === 'female' ? 'Use confident masculine expressions that show genuine interest in getting to know her better.' : userGender === 'female' && opponentGender === 'male' ? 'Use warm feminine expressions that show interest while maintaining some mystery.' : ''} ${userAge === 'teens' ? 'Use youthful, excited expressions of interest.' : userAge === '20s' ? 'Use modern, confident ways to show interest.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated expressions of romantic interest.' : ''} Include questions or comments that encourage them to share more about themselves. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a warm and interested tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate interest.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a reply that subtly shows romantic interest and curiosity. Use warm, engaging language. ${criticalNote}`
       },
       {
         name: 'Attractive Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that showcases your personality and charm to attract their interest. Be confident, engaging, and memorable. ${userGender === 'male' && opponentGender === 'female' ? 'Use confident masculine charm with wit and humor to impress her.' : userGender === 'female' && opponentGender === 'male' ? 'Use charming feminine appeal with playful confidence that draws his attention.' : ''} ${userAge === 'teens' ? 'Use youthful energy and trendy expressions to be appealing.' : userAge === '20s' ? 'Use modern confidence and charisma to stand out.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature sophistication and refined charm to be attractive.' : ''} Show your best qualities through your words and tone. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to an attractive and interesting tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to appeal appropriately.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a reply that showcases your personality and charm. Be confident and engaging. ${criticalNote}`
       },
       {
         name: 'Intimacy Building Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Write a reply that creates emotional connection and brings you closer together. Share something personal or find common ground. ${userGender === 'male' && opponentGender === 'female' ? 'Use sincere masculine expressions that build trust and emotional connection with her.' : userGender === 'female' && opponentGender === 'male' ? 'Use caring feminine expressions that create emotional intimacy and understanding with him.' : ''} ${userAge === 'teens' ? 'Use heartfelt, genuine expressions appropriate for young romance.' : userAge === '20s' ? 'Use modern, authentic ways to build emotional connection.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, deep expressions that create meaningful intimacy.' : ''} Be vulnerable and encouraging to deepen the relationship. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly and affectionate tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show reactions that can form intimacy.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a reply that creates emotional connection. Share something personal or find common ground. ${criticalNote}`
       },
       {
         name: 'Careful Rejection Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} ${opponentInfo} ${genderSpecificGuide} Politely decline their romantic advance while preserving their dignity and the possibility of friendship. Be gentle but clear about your boundaries. ${userGender === 'male' && opponentGender === 'female' ? 'Use respectful masculine language that declines gently while appreciating her feelings.' : userGender === 'female' && opponentGender === 'male' ? 'Use soft feminine expressions that let him down easy while being clear about your position.' : ''} ${userAge === 'teens' ? 'Use age-appropriate language to decline romantic interest kindly.' : userAge === '20s' ? 'Use modern, respectful ways to set romantic boundaries.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated language to decline gracefully while maintaining respect.' : ''} Acknowledge their feelings while redirecting the relationship. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and considerate tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Politely decline their advance while preserving dignity and friendship possibility. ${criticalNote}`
       }
     ];
   };
 
-  // Generate personalized speech styles based on user profile
-  const generatePersonalizedStyles = () => {
-    if (isRomanceMode) {
-      return generateRomanceStyles();
-    }
-    
-    const genderStyle = userGender === 'male' ? 'masculine and' : userGender === 'female' ? 'feminine and' : '';
-    const ageStyle = getAgeStyle(userAge);
-    const speechStyleGuide = userSpeechStyle ? `User's existing speech characteristics: "${userSpeechStyle}". Reflecting these characteristics` : '';
-    const intentGuide = intentAnalysis ? `Opponent's intent analysis: "${intentAnalysis}". Responding appropriately to this intent` : '';
+  // Friendly mode styles (separated for better organization)
+  const generateFriendlyStyles = (context) => {
+    const { genderStyle, ageStyle, speechStyleGuide, intentGuide } = context;
+    const basePrompt = `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle}`;
+    const criticalNote = '**CRITICAL**: You MUST write ONLY the actual message text. Do NOT write any analysis or explanations.';
     
     return [
       {
         name: 'Friendly Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a casual, friendly reply using informal language like you're talking to a close friend. Use casual expressions, contractions, and a relaxed tone. ${userGender === 'male' ? 'Use masculine, casual expressions like "man", "bro", "dude" when appropriate.' : userGender === 'female' ? 'Use feminine, casual expressions with warm emoticons and friendly language.' : ''} ${userAge === 'teens' ? 'Use trendy slang and youth expressions.' : userAge === '20s' ? 'Use modern casual expressions popular among young adults.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature but friendly casual language without being too formal.' : ''} ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a friendly tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a casual, friendly reply using informal language like talking to a close friend. ${criticalNote}`
       },
       {
         name: 'Polite Style', 
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a formal, respectful reply using polite language and honorifics. Use complete sentences, avoid contractions, and maintain a courteous tone throughout. ${userGender === 'male' ? 'Use respectful masculine language with proper honorifics.' : userGender === 'female' ? 'Use gentle, respectful feminine language with appropriate courtesy.' : ''} ${userAge === 'teens' ? 'Use polite but age-appropriate language for a teenager.' : userAge === '20s' ? 'Use modern polite expressions suitable for young adults.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use sophisticated, mature polite language with proper etiquette.' : ''} Include phrases like "please", "thank you", and formal sentence structures. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adjusting to a more polite tone.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a formal, respectful reply using polite language and honorifics. ${criticalNote}`
       },
       {
         name: 'Humorous Style',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a funny, witty reply that will make the other person laugh or smile. Use appropriate humor, playful teasing, or clever wordplay. ${userGender === 'male' ? 'Use masculine humor styles like witty one-liners or playful banter.' : userGender === 'female' ? 'Use charming, cute humor with playful expressions and light teasing.' : ''} ${userAge === 'teens' ? 'Use trendy memes, internet slang, and youth humor.' : userAge === '20s' ? 'Use modern humor and pop culture references.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use sophisticated, mature humor without being too silly.' : ''} Make sure the humor is appropriate for the conversation context. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while adding humorous elements.' : ''} ${intentAnalysis ? 'Consider the opponent\'s intentions and emotions to show appropriate reactions.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a funny, witty reply that will make the other person laugh or smile. ${criticalNote}`
       },
       {
         name: 'Polite Rejection',
-        prompt: `${speechStyleGuide} ${intentGuide} ${genderStyle} ${ageStyle} Write a polite but clear rejection that declines the other person's request or proposal. Be gentle but firm in your refusal. ${userGender === 'male' ? 'Use direct but respectful masculine language to decline clearly.' : userGender === 'female' ? 'Use soft, gentle feminine language that lets them down easy.' : ''} ${userAge === 'teens' ? 'Use age-appropriate language to decline politely.' : userAge === '20s' ? 'Use modern, respectful ways to say no.' : userAge === '30s' || userAge === '40s' || userAge === '50plus' ? 'Use mature, sophisticated language to decline gracefully.' : ''} Include appreciation for their interest but make your position clear. ${userSpeechStyle ? 'Maintain the user\'s usual speech patterns while rejecting in a soft and courteous tone.' : ''} ${intentAnalysis ? 'Express understanding of the opponent\'s intentions but include reasons for polite rejection.' : ''} **CRITICAL**: You MUST write ONLY the actual message text that I will send to the other person. Do NOT write any analysis, advice, or explanations. Write ONLY the direct reply message.`
+        prompt: `${basePrompt} Write a polite but clear rejection. Be gentle but firm in your refusal. ${criticalNote}`
       }
     ];
   };
@@ -608,10 +617,10 @@ Me: [Second message sent by me]
               }
             });
           }
-        } else if (section.includes('상대방의 최근 메시지')) {
+        } else if (section.includes('Latest Message from Other Person')) {
           latestOpponentMessage = sections[i + 1]?.trim() || '';
           console.log('Latest opponent message:', latestOpponentMessage);
-        } else if (section.includes('내 말투 분석')) {
+        } else if (section.includes('My Speech Style Analysis')) {
           const analysisResult = sections[i + 1]?.trim() || '';
           if (analysisResult) {
             setUserSpeechStyle(analysisResult);
@@ -993,15 +1002,15 @@ Me: [Second message sent by me]
         }
       }
 
-      // 사용자 메시지가 있으면 말투 분석 수행
+      // Perform speech style analysis if user messages exist
       if (userMessages.length > 0) {
         console.log('사용자 메시지 발견:', userMessages);
         await analyzeSpeechStyle(userMessages);
       }
 
-      // 상대방의 최근 메시지가 있으면 의도 분석 수행
+      // Perform intent analysis if recent opponent message exists
       if (latestOpponentMessage) {
-        console.log('상대방 메시지 의도 분석 시작...', latestOpponentMessage);
+        console.log('Starting opponent message intent analysis...', latestOpponentMessage);
         await analyzeOpponentIntent(latestOpponentMessage, '', []);
         setInputMessage(latestOpponentMessage);
       }
@@ -1074,7 +1083,7 @@ Me: [Second message sent by me]
 
     setLoading(true);
     try {
-      console.log('API 키 확인:', GOOGLE_AI_API_KEY.substring(0, 10) + '...');
+      console.log('API key check:', GOOGLE_AI_API_KEY.substring(0, 10) + '...');
       
       // Extract user messages for speech style analysis
       const userMessages = extractedMessages.filter(msg => msg.sender === 'user').map(msg => msg.text);
@@ -1191,7 +1200,7 @@ ${personalizedStyles[3].prompt}
     }
 
     if (!GOOGLE_AI_API_KEY || GOOGLE_AI_API_KEY.length < 10) {
-      Alert.alert('설정 필요', 'Google AI API 키를 설정해주세요.');
+      Alert.alert('Setup Required', 'Please set up your Google AI API key.');
       return;
     }
 
